@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createBrute, getBrutesByUserId } from '@/lib/brutes';
 import { ZodError, z } from 'zod';
 
+// Ajouter cette ligne près du début du fichier
+export const dynamic = 'force-dynamic';
+
 // Schéma de validation pour la création d'une brute
 const createBruteSchema = z.object({
   userId: z.string().uuid('ID utilisateur invalide'),

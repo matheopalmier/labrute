@@ -4,6 +4,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { addExperience } from '@/lib/brutes';
 
+// Configuration pour empêcher la génération statique de cette route
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     // Vérifier l'authentification

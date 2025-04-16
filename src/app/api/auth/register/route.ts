@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createUser, findUserByEmail } from '@/lib/auth';
 import { ZodError, z } from 'zod';
 
+// Ajouter cette ligne près du début du fichier
+export const dynamic = 'force-dynamic';
+
 // Schéma de validation pour l'inscription
 const registerSchema = z.object({
   username: z.string().min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères'),

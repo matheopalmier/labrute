@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { findUserById } from '@/lib/auth';
 
+// Configuration pour empêcher la génération statique de cette route
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Récupérer la session
