@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# La Brute
 
-## Getting Started
+Recréation du jeu browser "La Brute", un jeu de combat au tour par tour où vous créez des personnages avec des statistiques aléatoires qui combattent automatiquement d'autres "brutes".
 
-First, run the development server:
+## Caractéristiques
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Création de personnages avec des statistiques aléatoires
+- Combats au tour par tour automatiques
+- Progression par niveaux et amélioration des statistiques
+- Collection d'objets pour améliorer votre brute
+- Interface utilisateur moderne et réactive
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Technologies utilisées
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Next.js 14 avec App Router
+- React
+- TypeScript
+- Tailwind CSS pour le styling
+- Prisma avec SQLite pour la base de données
+- NextAuth.js pour l'authentification
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Prérequis
 
-## Learn More
+- Node.js 18.17.0 ou plus récent
+- npm 9.6.7 ou plus récent
 
-To learn more about Next.js, take a look at the following resources:
+## Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Clonez le dépôt :
+   ```bash
+   git clone https://github.com/votre-nom/labrute.git
+   cd labrute
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. Installez les dépendances :
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+3. Configurez la base de données :
+   ```bash
+   npx prisma migrate dev --name init
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Démarrez le serveur de développement :
+   ```bash
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur.
+
+## Structure du projet
+
+- `/src/app` - Répertoire principal de l'application Next.js
+  - `/(auth)` - Routes d'authentification (login, register)
+  - `/(game)` - Routes du jeu (dashboard, brutes, combat, shop)
+- `/prisma` - Schéma et migrations de la base de données
+- `/src/components` - Composants réutilisables
+- `/src/lib` - Utilitaires et services
+
+## Fonctionnalités à venir
+
+- Implémentation complète du système de combat
+- Classement des joueurs
+- Effets d'objets spéciaux
+- Animations de combat
+- Événements spéciaux hebdomadaires
+
+## Contribution
+
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou à soumettre une pull request.
+
+## Licence
+
+Ce projet est sous licence MIT.

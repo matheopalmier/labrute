@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  brutes    Brute[]
+}
+
+model Brute {
+  id              String      @id @default(uuid())
+  name            String
+  level           Int         @default(1)
+  experience      Int         @default(0)
+  strength        Int         @default(0)
+  agility         Int         @default(0)
+  speed           Int         @default(0)
+  health          Int         @default(0)
+  intelligence    Int         @default(0)
+  victories       Int         @default(0)
+  defeats         Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           BruteItem[]
+  combats         Combat[]    @relation("BruteCombats")
+  opponentCombats Combat[]    @relation("OpponentCombats")
+}
+
+model Item {
+  id                String      @id @default(uuid())
+  name              String
+  description       String
+  rarity            String      @default("common") // common, uncommon, rare, epic, legendary
+  strengthBonus     Int         @default(0)
+  agilityBonus      Int         @default(0)
+  speedBonus        Int         @default(0)
+  healthBonus       Int         @default(0)
+  intelligenceBonus Int         @default(0)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  bruteItems        BruteItem[]
+}
+
+model BruteItem {
+  id        String   @id @default(uuid())
+  bruteId   String
+  itemId    String
+  equipped  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  brute     Brute    @relation(fields: [bruteId], references: [id], onDelete: Cascade)
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([bruteId, itemId])
+}
+
+model Combat {
+  id         String   @id @default(uuid())
+  bruteId    String
+  opponentId String
+  winnerId   String?
+  logs       String // JSON string containing combat log
+  createdAt  DateTime @default(now())
+
+  brute    Brute @relation("BruteCombats", fields: [bruteId], references: [id], onDelete: Cascade)
+  opponent Brute @relation("OpponentCombats", fields: [opponentId], references: [id], onDelete: Cascade)
+}
