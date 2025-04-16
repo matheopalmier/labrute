@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -23,7 +23,7 @@ type Brute = {
   updatedAt: Date;
 };
 
-export default function CombatPage() {
+function CombatPageContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -200,13 +200,22 @@ export default function CombatPage() {
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-900 text-2xl">
                       {getEmoji(brute.name, brute.userId)}
                     </div>
-                    <div>
-                      <h3 className="font-medium text-white">{brute.name}</h3>
-                      <p className="text-sm text-zinc-400">Niveau {brute.level}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center">
+                        <h3 className="font-bold text-white">{brute.name}</h3>
+                        <span className="ml-2 text-sm text-zinc-400">Niv. {brute.level}</span>
+                      </div>
+                      <div className="text-sm text-zinc-300">
+                        Victoires: {brute.victories} | Défaites: {brute.defeats}
+                      </div>
                     </div>
-                    <button 
+                    <button
+                      className={`rounded-md px-4 py-2 ${
+                        selectedBrute?.id === brute.id 
+                          ? 'bg-purple-600 text-white' 
+                          : 'bg-zinc-700 text-zinc-200 hover:bg-zinc-600'
+                      }`}
                       onClick={() => handleSelectBrute(brute)}
-                      className={`ml-auto rounded-md ${selectedBrute?.id === brute.id ? 'bg-purple-500' : 'bg-purple-700'} px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-purple-600`}
                     >
                       {selectedBrute?.id === brute.id ? 'Sélectionnée' : 'Sélectionner'}
                     </button>
@@ -214,147 +223,68 @@ export default function CombatPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center p-4">
-                <p className="text-zinc-300 mb-3">Vous n'avez pas encore de brute.</p>
-                <button 
-                  onClick={() => router.push('/brutes')}
+              <div className="bg-white/5 rounded-lg p-6 text-center">
+                <p className="text-zinc-300 mb-4">Vous n'avez pas encore de brute.</p>
+                <Link 
+                  href="/dashboard" 
                   className="bg-purple-700 hover:bg-purple-600 text-white px-4 py-2 rounded-md"
                 >
                   Créer une brute
-                </button>
+                </Link>
               </div>
             )}
           </div>
           
-          <div className="overflow-hidden rounded-lg bg-white/10 p-6 shadow backdrop-blur-sm">
-            <h2 className="mb-4 text-xl font-bold text-white">Adversaires disponibles</h2>
-            
-            <div className="space-y-3">
-              {opponents.map((opponent) => (
-                <div key={opponent.id} className="flex items-center gap-4 rounded-lg bg-white/5 p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-900 text-2xl">
-                    {getEmoji(opponent.name, opponent.userId)}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-white">{opponent.name}</h3>
-                    <div className="flex gap-2 text-xs">
-                      <span className="text-zinc-400">Niveau {opponent.level}</span>
-                      <span className="text-green-400">{opponent.victories || 0} V</span>
-                      <span className="text-red-400">{opponent.defeats || 0} D</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleCombat(opponent.id)}
-                    disabled={!selectedBrute}
-                    className={`ml-auto rounded-md ${!selectedBrute ? 'cursor-not-allowed bg-zinc-700 opacity-50' : 'bg-red-700 hover:bg-red-600'} px-3 py-1 text-sm font-medium text-white`}
-                  >
-                    Combattre
-                  </button>
-                </div>
-              ))}
-            </div>
-            
-            {!selectedBrute && (
-              <p className="mt-4 text-center text-sm text-zinc-400">
-                Sélectionnez d'abord une de vos brutes pour combattre
-              </p>
-            )}
-          </div>
-        </div>
-        
-        <div className="mt-6 rounded-lg bg-white/10 p-6 shadow backdrop-blur-sm">
-          <h2 className="mb-4 text-xl font-bold text-white">Comment fonctionnent les combats ?</h2>
-          
-          <div className="space-y-3 text-zinc-300">
-            <p>
-              Les combats sont automatiques et se déroulent au tour par tour. Les statistiques de votre brute déterminent ses chances de gagner.
-            </p>
-            <ul className="list-inside list-disc space-y-1 pl-4">
-              <li><span className="text-red-400">Force</span> : augmente les dégâts infligés</li>
-              <li><span className="text-green-400">Agilité</span> : améliore les chances d'esquiver et de toucher</li>
-              <li><span className="text-blue-400">Vitesse</span> : détermine l'ordre des attaques</li>
-              <li><span className="text-yellow-400">Santé</span> : augmente les points de vie</li>
-              <li><span className="text-purple-400">Intelligence</span> : améliore l'utilisation des objets</li>
-            </ul>
-            <p>
-              Chaque combat vous rapporte de l'expérience, que vous gagniez ou perdiez. Gagnez des niveaux pour améliorer vos statistiques !
-            </p>
-          </div>
-        </div>
-
-        {/* Choix de l'adversaire */}
-        {selectedBrute && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Choisissez un adversaire</h2>
-            
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {opponents.map((opponent) => (
-                <div 
-                  key={opponent.id} 
-                  className="rounded-lg bg-white/10 p-4 shadow backdrop-blur-sm transition-all hover:bg-white/15 cursor-pointer"
-                  onClick={() => handleCombat(opponent.id)}
-                >
-                  <div className="mb-3 flex items-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-900 text-2xl">
-                      {getEmoji(opponent.name, opponent.userId)}
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="font-medium text-white flex items-center">
-                        {opponent.name}
-                        {renderBruteBadge(opponent)}
-                      </h3>
-                      <p className="text-sm text-zinc-400">Niveau {opponent.level}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex text-xs text-zinc-400 mb-2">
-                    <span className="flex-1">
-                      <span className="text-green-400">{opponent.victories}</span> V
-                    </span>
-                    <span className="flex-1 text-center">/</span>
-                    <span className="flex-1 text-right">
-                      <span className="text-red-400">{opponent.defeats}</span> D
-                    </span>
-                  </div>
-                  
-                  <div className="rounded bg-purple-900/20 p-2 text-xs text-zinc-300">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="flex items-center">
-                        <span className="text-red-400 mr-1">FOR</span> {opponent.strength}
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-green-400 mr-1">AGI</span> {opponent.agility}
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-blue-400 mr-1">VIT</span> {opponent.speed}
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-yellow-400 mr-1">SAN</span> {opponent.health}
-                      </div>
-                      <div className="col-span-2 flex items-center">
-                        <span className="text-purple-400 mr-1">INT</span> {opponent.intelligence}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <button 
-                    className="mt-3 w-full rounded-md bg-purple-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-600 active:translate-y-0.5"
-                  >
-                    Combattre
-                  </button>
-                </div>
-              ))}
+          {selectedBrute && (
+            <div className="overflow-hidden rounded-lg bg-white/10 p-6 shadow backdrop-blur-sm">
+              <h2 className="mb-4 text-xl font-bold text-white">Choisir un adversaire</h2>
               
-              {opponents.length === 0 && !loading && (
-                <div className="col-span-full rounded-lg bg-white/10 p-6 text-center shadow backdrop-blur-sm">
-                  <p className="text-zinc-300">Aucun adversaire disponible pour le moment.</p>
-                  <p className="mt-2 text-sm text-zinc-400">Revenez plus tard pour trouver des adversaires.</p>
+              {opponents.length > 0 ? (
+                <div className="space-y-3">
+                  {opponents.map((opponent) => (
+                    <div 
+                      key={opponent.id} 
+                      className="flex items-center gap-4 rounded-lg bg-white/5 p-4"
+                    >
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-900 text-2xl">
+                        {getEmoji(opponent.name, opponent.userId)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center">
+                          <h3 className="font-bold text-white">{opponent.name}</h3>
+                          <span className="ml-2 text-sm text-zinc-400">Niv. {opponent.level}</span>
+                          {renderBruteBadge(opponent)}
+                        </div>
+                        <div className="text-sm text-zinc-300">
+                          Victoires: {opponent.victories} | Défaites: {opponent.defeats}
+                        </div>
+                      </div>
+                      <button
+                        className="rounded-md bg-red-700 px-4 py-2 text-white hover:bg-red-600"
+                        onClick={() => handleCombat(opponent.id)}
+                      >
+                        Combattre
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex h-40 items-center justify-center">
+                  <p className="text-zinc-300">Aucun adversaire disponible pour le moment. Réessayez plus tard.</p>
                 </div>
               )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
+  );
+}
+
+export default function CombatPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Chargement de la page de combat...</div>}>
+      <CombatPageContent />
+    </Suspense>
   );
 } 

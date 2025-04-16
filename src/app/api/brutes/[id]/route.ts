@@ -2,92 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getBruteById, deleteBrute } from '@/lib/brutes';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-options';
 
 // Route GET pour récupérer une brute spécifique
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest
 ) {
   try {
-    const id = params.id;
-    
-    // Pour les brutes des adversaires (qui commencent par un identifiant spécifique), 
-    // on renvoie des données simulées
-    if (id.startsWith('10')) {
-      // Adversaires du système
-      const systemBrutes = {
-        '101': {
-          id: '101',
-          name: 'Goliath',
-          level: 4,
-          strength: 10,
-          agility: 3,
-          speed: 2,
-          health: 25,
-          intelligence: 1,
-          victories: 15,
-          defeats: 5,
-          experience: 0,
-          userId: 'system',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        '102': {
-          id: '102',
-          name: 'Ninja',
-          level: 2,
-          strength: 4,
-          agility: 12,
-          speed: 10,
-          health: 15,
-          intelligence: 6,
-          victories: 8,
-          defeats: 2,
-          experience: 0,
-          userId: 'system',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        '103': {
-          id: '103',
-          name: 'Sorcier',
-          level: 5,
-          strength: 3,
-          agility: 5,
-          speed: 6,
-          health: 18,
-          intelligence: 14,
-          victories: 20,
-          defeats: 8,
-          experience: 0,
-          userId: 'system',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        '104': {
-          id: '104',
-          name: 'Guerrier',
-          level: 3,
-          strength: 12,
-          agility: 6,
-          speed: 4,
-          health: 22,
-          intelligence: 3,
-          victories: 5,
-          defeats: 1,
-          experience: 0,
-          userId: 'system',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      };
-      
-      const systemBrute = systemBrutes[id as keyof typeof systemBrutes];
-      if (systemBrute) {
-        return NextResponse.json(systemBrute);
-      }
-    }
+    // Extraire l'ID de la brute depuis l'URL
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    const id = pathSegments[pathSegments.length - 1];
     
     // Vérifier l'authentification pour les brutes des joueurs
     const session = await getServerSession(authOptions);
@@ -142,15 +67,16 @@ export async function GET(
 
 // Route DELETE pour supprimer une brute
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest
 ) {
   try {
-    const bruteId = params.id;
+    // Extraire l'ID de la brute depuis l'URL
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    const bruteId = pathSegments[pathSegments.length - 1];
     
     // Dans une application réelle, vous obtiendriez l'ID de l'utilisateur à partir de la session
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const userId = url.searchParams.get('userId');
     
     if (!userId) {
       return NextResponse.json(

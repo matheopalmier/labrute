@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -27,7 +27,7 @@ type CombatLog = {
   effect?: string;
 };
 
-export default function CombatResultPage() {
+function CombatResult() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bruteId = searchParams.get('bruteId');
@@ -554,5 +554,13 @@ export default function CombatResultPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CombatResultPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Chargement du combat...</div>}>
+      <CombatResult />
+    </Suspense>
   );
 } 
