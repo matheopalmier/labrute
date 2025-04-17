@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "chmod +x netlify/build.sh && netlify/build.sh"
   publish = ".next"
 
 [[plugins]]
@@ -8,6 +8,8 @@
 [build.environment]
   NEXT_USE_NETLIFY_EDGE = "true"
   NODE_VERSION = "18"
+  PRISMA_GENERATE_DATAPROXY = "true"
+  DATABASE_URL = "${env:DATABASE_URL}"
 
 # Redirection pour les routes API
 [[redirects]]
