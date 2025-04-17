@@ -8,6 +8,19 @@ export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    errorFormat: 'pretty',
   });
+
+// Gestion spécifique pour les déploiements Netlify
+if (process.env.NODE_ENV === 'production') {
+  prisma.$use(async (params, next) => {
+    try {
+      return await next(params);
+    } catch (error) {
+      console.error(`Prisma Error in ${params.model}.${params.action}:`, error);
+      throw error;
+    }
+  });
+}
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma; 

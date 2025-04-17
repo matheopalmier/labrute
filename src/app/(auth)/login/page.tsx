@@ -50,27 +50,42 @@ export default function LoginPage() {
       try {
         const userResponse = await fetch('/api/users/me');
         
+        // Vérifier le type de contenu
+        const contentType = userResponse.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.error('Réponse invalide lors de la récupération des données utilisateur:', await userResponse.text());
+          throw new Error('Erreur de communication avec le serveur');
+        }
+        
         if (userResponse.ok) {
-          const userData = await userResponse.json();
-          // Stocker les données utilisateur dans localStorage
-          localStorage.setItem('user', JSON.stringify({
-            id: userData.id,
-            username: userData.username || userData.name,
-            email: userData.email
-          }));
-          console.log('Utilisateur connecté et stocké dans localStorage:', userData);
+          let userData;
+          try {
+            userData = await userResponse.json();
+            // Stocker les données utilisateur dans localStorage
+            localStorage.setItem('user', JSON.stringify({
+              id: userData.id,
+              username: userData.username || userData.name,
+              email: userData.email
+            }));
+            console.log('Utilisateur connecté et stocké dans localStorage:', userData);
+          } catch (jsonError) {
+            console.error('Erreur de parsing JSON pour les données utilisateur:', jsonError);
+            // Continuer sans stocker les données utilisateur
+          }
         } else {
-          console.error('Erreur lors de la récupération des données utilisateur');
+          console.error('Erreur lors de la récupération des données utilisateur:', userResponse.status);
         }
       } catch (userError) {
         console.error('Erreur lors de la récupération des données utilisateur:', userError);
+        // Continuer sans les données utilisateur
       }
       
       // Redirection vers le tableau de bord
       router.push('/dashboard');
       router.refresh(); // Pour s'assurer que tous les composants sont mis à jour avec la nouvelle session
     } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue');
+      console.error('Erreur de connexion:', err);
+      setError(err.message || 'Une erreur est survenue lors de la connexion');
     } finally {
       setIsLoading(false);
     }

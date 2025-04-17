@@ -51,15 +51,28 @@ export default function RegisterPage() {
         })
       });
       
-      const data = await response.json();
+      // Vérifier d'abord le type de contenu
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Réponse du serveur invalide. Veuillez réessayer plus tard.');
+      }
+      
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Erreur de parsing JSON:', jsonError);
+        throw new Error('Erreur de communication avec le serveur. Veuillez réessayer plus tard.');
+      }
       
       if (!response.ok) {
-        throw new Error(data.message || 'Une erreur est survenue');
+        throw new Error(data.message || 'Une erreur est survenue lors de l\'inscription');
       }
       
       // Redirection vers la page de connexion après inscription réussie
-      router.push('/login');
+      router.push('/login?registered=true');
     } catch (err: any) {
+      console.error('Erreur d\'inscription:', err);
       setError(err.message || 'Une erreur est survenue');
     } finally {
       setIsLoading(false);
